@@ -17,7 +17,28 @@ async function loadMetadata() {
   if (cachedMetadata) return cachedMetadata;
 
   const response = await fetch('/data/metadata.json');
-  cachedMetadata = await response.json();
+  const rawMetadata = await response.json();
+
+  // Enrich tracks with is_looking_at_camera field
+  const faceData = rawMetadata.face_data || [];
+
+  // Get track IDs of persons looking
+  const looking = faceData.filter(f =>
+    f.gaze_data && f.gaze_data.looking_at_camera
+  );
+  const trackIdsLooking = new Set(looking.map(f => f.track_id));
+
+  // Add is_looking_at_camera to each track
+  const enrichedTracks = (rawMetadata.tracks || []).map(track => ({
+    ...track,
+    is_looking_at_camera: trackIdsLooking.has(track.track_id),
+  }));
+
+  cachedMetadata = {
+    ...rawMetadata,
+    tracks: enrichedTracks,
+  };
+
   return cachedMetadata;
 }
 
