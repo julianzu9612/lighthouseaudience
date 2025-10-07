@@ -37,7 +37,7 @@ async function computeStats() {
     genderCounts[gender]++;
   });
 
-  // Age distribution
+  // Age distribution - count by ranges
   const ageRanges = {
     '0-18': 0,
     '19-25': 0,
@@ -59,6 +59,13 @@ async function computeStats() {
     else if (avgAge <= 60) ageRanges['46-60']++;
     else ageRanges['60+']++;
   });
+
+  // Convert to array format for charts (like backend does)
+  const ageDistributionArray = Object.entries(ageRanges).map(([range, count]) => ({
+    range,
+    count,
+    percentage: tracks.length > 0 ? Math.round((count / tracks.length) * 1000) / 10 : 0,
+  }));
 
   // Gaze stats - use face_data like backend does
   const faceData = metadata.face_data || [];
@@ -95,7 +102,7 @@ async function computeStats() {
     demographics: {
       gender_distribution: genderCounts,
       age_average: Math.round(avgAge),
-      age_distribution: ageRanges,
+      age_distribution: ageDistributionArray,
     },
     engagement: {
       faces_looking: looking.length,
