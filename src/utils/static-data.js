@@ -190,21 +190,41 @@ async function computeTimelinePersons() {
 
   const metadata = await loadMetadata();
   const tracks = metadata.tracks || [];
+  const frames = metadata.frames || [];
+  const faceData = metadata.face_data || [];
   const videoInfo = metadata.video_info || {};
   const fps = videoInfo.fps || 30;
 
+  // Get track IDs of persons looking (using face_data)
+  const looking = faceData.filter(f =>
+    f.gaze_data && f.gaze_data.looking_at_camera
+  );
+  const trackIdsLooking = new Set(looking.map(f => f.track_id));
+
   // Get first frame for each track
   const persons = tracks.map(track => {
-    const firstFrame = track.frames?.[0]?.frame_id || 0;
-    const timestamp = firstFrame / fps;
+    const trackId = track.track_id;
+
+    // Find first frame where this track appears
+    let firstFrameId = 0;
+    for (const frame of frames) {
+      const detections = frame.detections || [];
+      if (detections.some(d => d.track_id === trackId)) {
+        firstFrameId = frame.frame_id;
+        break;
+      }
+    }
+
+    const timestamp = firstFrameId / fps;
 
     return {
-      track_id: track.track_id,
-      first_appearance: timestamp,
-      gender: track.demographic_analysis?.gender || 'unknown',
-      age_range: track.demographic_analysis?.age_range || { min_age: 0, max_age: 100 },
+      track_id: trackId,
+      timestamp,  // Changed from first_appearance to timestamp
+      is_looking_at_camera: trackIdsLooking.has(trackId),
+      demographic_analysis: track.demographic_analysis || {},
+      frame_id: firstFrameId,
     };
-  }).sort((a, b) => a.first_appearance - b.first_appearance);
+  }).sort((a, b) => a.timestamp - b.timestamp);
 
   cachedTimelinePersons = { persons };
   return cachedTimelinePersons;
