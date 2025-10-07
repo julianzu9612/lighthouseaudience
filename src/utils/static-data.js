@@ -60,23 +60,17 @@ async function computeStats() {
     else ageRanges['60+']++;
   });
 
-  // Gaze stats
-  let lookingAtCamera = 0;
-  let notLooking = 0;
+  // Gaze stats - use face_data like backend does
+  const faceData = metadata.face_data || [];
 
-  tracks.forEach(track => {
-    const gazeData = track.gaze_data;
-    if (!gazeData) return;
+  // Get faces looking at camera
+  const looking = faceData.filter(f =>
+    f.gaze_data && f.gaze_data.looking_at_camera
+  );
+  const trackIdsLooking = new Set(looking.map(f => f.track_id));
 
-    const { yaw_angle, pitch_angle } = gazeData;
-    const yawThreshold = 25;
-    const pitchThreshold = 30;
-
-    const isLooking = Math.abs(yaw_angle) <= yawThreshold && Math.abs(pitch_angle) <= pitchThreshold;
-
-    if (isLooking) lookingAtCamera++;
-    else notLooking++;
-  });
+  const lookingAtCamera = trackIdsLooking.size;
+  const notLooking = tracks.length - lookingAtCamera;
 
   cachedStats = {
     total_tracks: tracks.length,
@@ -192,21 +186,21 @@ async function computePersonsLooking() {
 
   const metadata = await loadMetadata();
   const tracks = metadata.tracks || [];
+  const faceData = metadata.face_data || [];
 
-  const personsLooking = tracks.filter(track => {
-    const gazeData = track.gaze_data;
-    if (!gazeData) return false;
+  // Get track IDs of persons looking (using face_data like backend)
+  const looking = faceData.filter(f =>
+    f.gaze_data && f.gaze_data.looking_at_camera
+  );
+  const trackIdsLooking = new Set(looking.map(f => f.track_id));
 
-    const { yaw_angle, pitch_angle } = gazeData;
-    const yawThreshold = 25;
-    const pitchThreshold = 30;
-
-    return Math.abs(yaw_angle) <= yawThreshold && Math.abs(pitch_angle) <= pitchThreshold;
-  }).map(track => ({
-    track_id: track.track_id,
-    gaze_data: track.gaze_data,
-    demographic_analysis: track.demographic_analysis,
-  }));
+  // Get full track data for those persons
+  const personsLooking = tracks
+    .filter(t => trackIdsLooking.has(t.track_id))
+    .map(track => ({
+      track_id: track.track_id,
+      demographic_analysis: track.demographic_analysis,
+    }));
 
   cachedPersonsLooking = { persons: personsLooking };
   return cachedPersonsLooking;
