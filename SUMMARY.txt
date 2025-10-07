@@ -1,0 +1,73 @@
+================================================================================
+🎯 LIGHTHOUSE AUDIENCE - DEMO ESTÁTICO
+================================================================================
+
+✅ COMPLETADO - Demo listo para desplegar
+
+📁 Ubicación: /home/jzuluaga/lighthouse-demo/
+
+📊 Contenido:
+  - 54 personas rastreadas con análisis demográfico
+  - Video procesado (43 MB, H.264 web-compatible)
+  - 54 crops de personas (776 KB total)
+  - Metadata completa (1.4 MB)
+  - Dashboard React interactivo
+
+🎨 Características:
+  ✓ Sin backend (100% estático, gratis para siempre)
+  ✓ Datos hardcodeados desde /public/data/metadata.json
+  ✓ Video y crops servidos como archivos estáticos
+  ✓ Build optimizado para producción
+  ✓ Listo para Vercel/Netlify/GitHub Pages
+
+📦 Tamaño Total: ~45 MB
+  - Video: 43 MB
+  - Metadata: 1.4 MB  
+  - Crops: 776 KB
+  - Code/Assets: <500 KB
+
+🔧 Stack Tecnológico:
+  - React 18 + Vite
+  - Tailwind CSS
+  - Recharts (gráficos)
+  - Framer Motion (animaciones)
+  - D3 (word cloud)
+
+🚀 Próximos Pasos:
+
+1. Crear repositorio en GitHub:
+   https://github.com/new
+   Nombre sugerido: lighthouse-audience-demo
+
+2. Subir código:
+   cd /home/jzuluaga/lighthouse-demo
+   git remote add origin https://github.com/TU_USUARIO/lighthouse-audience-demo.git
+   git branch -M main
+   git push -u origin main
+
+3. Desplegar en Vercel:
+   - Ir a https://vercel.com/new
+   - Importar repositorio
+   - Deploy (automático, 2 minutos)
+   
+   O usar CLI:
+   npm install -g vercel
+   vercel --prod
+
+4. Tu demo estará en:
+   https://lighthouse-audience-demo.vercel.app
+
+💰 Costo: $0 (gratis permanente en Vercel free tier)
+
+📝 Archivos importantes:
+  - README.md: Descripción del proyecto
+  - DEPLOY.md: Instrucciones detalladas de deploy
+  - vercel.json: Configuración de Vercel
+  - .gitignore: Archivos ignorados por git
+
+⚠️  Repositorio Original:
+  ✓ /home/jzuluaga/code/orbitalmarketing/claudemooh
+  ✓ Completamente intacto (verificado)
+  ✓ Sin cambios ni archivos modificados
+
+================================================================================

@@ -43,7 +43,7 @@ const WordCloudViz = ({ videoId }) => {
       });
 
       // Transform API data to react-wordcloud format
-      const words = data.keywords.map(item => ({
+      const words = (data.words || data.keywords || []).map(item => ({
         text: item.text,
         value: item.value,
       }));
