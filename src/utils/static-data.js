@@ -72,16 +72,41 @@ async function computeStats() {
   const lookingAtCamera = trackIdsLooking.size;
   const notLooking = tracks.length - lookingAtCamera;
 
+  // Calculate age average
+  const ages = tracks.map(t => {
+    const minAge = t.demographic_analysis?.age_range?.min_age || 0;
+    const maxAge = t.demographic_analysis?.age_range?.max_age || 0;
+    return (minAge + maxAge) / 2;
+  });
+  const avgAge = ages.length > 0 ? ages.reduce((a, b) => a + b, 0) / ages.length : 0;
+
+  // Count total detections from frames
+  const frames = metadata.frames || [];
+  const totalDetections = frames.reduce((sum, f) => sum + (f.detections?.length || 0), 0);
+
+  // Match backend structure exactly
   cachedStats = {
-    total_tracks: tracks.length,
-    total_frames: metadata.video_info?.total_frames || 0,
-    duration_seconds: metadata.video_info?.duration || 0,
-    gender_distribution: genderCounts,
-    age_distribution: ageRanges,
-    gaze_stats: {
-      looking_at_camera: lookingAtCamera,
-      not_looking: notLooking,
+    totals: {
+      tracks: tracks.length,
+      faces: faceData.length,
+      frames: frames.length,
+      detections: totalDetections,
     },
+    demographics: {
+      gender_distribution: genderCounts,
+      age_average: Math.round(avgAge),
+      age_distribution: ageRanges,
+    },
+    engagement: {
+      faces_looking: looking.length,
+      persons_looking: lookingAtCamera,
+      engagement_rate: tracks.length > 0 ? Math.round((lookingAtCamera / tracks.length) * 100) : 0,
+    },
+    traffic: {
+      total_detections: totalDetections,
+      average_density: frames.length > 0 ? (totalDetections / frames.length).toFixed(2) : 0,
+    },
+    video: metadata.video_info || {},
   };
 
   return cachedStats;
