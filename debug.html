@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Debug Console</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+        }
+        #logs {
+            white-space: pre-wrap;
+            padding: 20px;
+            background: #000;
+            border: 2px solid #333;
+            border-radius: 8px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .error { color: #ff0000; font-weight: bold; }
+        .warn { color: #ffaa00; }
+        .info { color: #00aaff; }
+        .success { color: #00ff00; }
+        h1 { color: #ff0000; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Dashboard Debug Console</h1>
+    <div id="logs"></div>
+
+    <script>
+        const logsDiv = document.getElementById('logs');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const line = document.createElement('div');
+            line.className = type;
+            line.textContent = `[${timestamp}] ${message}`;
+            logsDiv.appendChild(line);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+
+        log('=== Dashboard Debug Started ===', 'success');
+        log('Testing backend connection...', 'info');
+
+        // Test backend health
+        fetch('http://localhost:5000/api/health')
+            .then(r => r.json())
+            .then(data => {
+                log('✓ Backend health check: ' + JSON.stringify(data), 'success');
+            })
+            .catch(err => {
+                log('✗ Backend health check failed: ' + err.message, 'error');
+            });
+
+        // Test videos endpoint
+        fetch('http://localhost:5000/api/videos')
+            .then(r => r.json())
+            .then(data => {
+                log('✓ Videos endpoint: Found ' + data.count + ' videos', 'success');
+                log('Videos: ' + JSON.stringify(data.videos, null, 2), 'info');
+            })
+            .catch(err => {
+                log('✗ Videos endpoint failed: ' + err.message, 'error');
+            });
+
+        // Test frontend
+        log('Testing frontend...', 'info');
+        fetch('http://localhost:5173/')
+            .then(r => r.text())
+            .then(html => {
+                if (html.includes('root')) {
+                    log('✓ Frontend HTML loaded successfully', 'success');
+                } else {
+                    log('✗ Frontend HTML missing root element', 'error');
+                }
+            })
+            .catch(err => {
+                log('✗ Frontend loading failed: ' + err.message, 'error');
+            });
+
+        // Try to load React app
+        setTimeout(() => {
+            log('Attempting to capture frontend errors...', 'info');
+
+            const iframe = document.createElement('iframe');
+            iframe.style.width = '0';
+            iframe.style.height = '0';
+            iframe.style.border = 'none';
+            iframe.src = 'http://localhost:5173';
+
+            iframe.onload = () => {
+                log('✓ Frontend iframe loaded', 'success');
+
+                try {
+                    const iframeWindow = iframe.contentWindow;
+                    const iframeConsole = iframeWindow.console;
+
+                    // Intercept console methods
+                    ['log', 'warn', 'error'].forEach(method => {
+                        const original = iframeConsole[method];
+                        iframeConsole[method] = function(...args) {
+                            log(`FRONTEND ${method.toUpperCase()}: ${args.join(' ')}`, method === 'error' ? 'error' : method === 'warn' ? 'warn' : 'info');
+                            original.apply(iframeConsole, args);
+                        };
+                    });
+
+                    // Catch errors
+                    iframeWindow.addEventListener('error', (e) => {
+                        log(`✗ FRONTEND ERROR: ${e.message} at ${e.filename}:${e.lineno}:${e.colno}`, 'error');
+                        log(`Stack: ${e.error?.stack || 'No stack trace'}`, 'error');
+                    });
+
+                    iframeWindow.addEventListener('unhandledrejection', (e) => {
+                        log(`✗ UNHANDLED PROMISE REJECTION: ${e.reason}`, 'error');
+                    });
+                } catch (err) {
+                    log('✗ Could not intercept iframe console (CORS?): ' + err.message, 'warn');
+                }
+            };
+
+            iframe.onerror = () => {
+                log('✗ Frontend iframe failed to load', 'error');
+            };
+
+            document.body.appendChild(iframe);
+        }, 2000);
+    </script>
+</body>
+</html>

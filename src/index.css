@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-pitch-black text-white antialiased;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-charcoal/50 backdrop-blur-sm border border-slate/30 rounded-lg;
+  }
+
+  .glass-panel-hover {
+    @apply glass-panel hover:border-dark-red/50 transition-all duration-300;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-red text-white px-4 py-2 rounded-lg font-semibold;
+    @apply hover:shadow-lg hover:shadow-fire-red/50 transition-all duration-300;
+  }
+
+  .btn-secondary {
+    @apply bg-slate text-white px-4 py-2 rounded-lg font-semibold;
+    @apply hover:bg-dim-gray transition-all duration-300;
+  }
+
+  .metric-card {
+    @apply glass-panel p-6 animate-slide-in;
+  }
+
+  .metric-value {
+    @apply text-4xl font-bold bg-gradient-to-r from-fire-red to-crimson bg-clip-text text-transparent;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-charcoal;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-dark-red rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-fire-red;
+}
+
+/* Loading animation */
+.loading-dots::after {
+  content: '...';
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { content: '.'; }
+  33% { content: '..'; }
+  66% { content: '...'; }
+}
