@@ -104,7 +104,7 @@ async function computeStats() {
     },
     traffic: {
       total_detections: totalDetections,
-      average_density: frames.length > 0 ? (totalDetections / frames.length).toFixed(2) : 0,
+      average_density: frames.length > 0 ? parseFloat((totalDetections / frames.length).toFixed(2)) : 0,
     },
     video: metadata.video_info || {},
   };
